@@ -21,17 +21,28 @@ void hello_world() {
 
 int main() {
 
-    int a = 10;
-    int b = 999999;
-    printf("a = %3d : b = %3d\n",a,b);
-    swap(&a, &b);
-    printf("a = %3d : b = %3d\n",a,b);
+//    int a = 10;
+//    int b = 999999;
+//    printf("a = %3d : b = %3d\n",a,b);
+//    swap(&a, &b);
+//    printf("a = %3d : b = %3d\n",a,b);
     int target[] = {2,1 , 4, 6, -1, -200};
     size_t size = sizeof(target) / sizeof(target[0]);
+    for (int i = 0; i < size; ++i) {
+        printf("%d\n", target[i]);
+    }
+    printf("---\n\n ");
+    MyQuickSort(target, size);
+
+    for (int i = 0; i < size; ++i) {
+        printf("%d\n", target[i]);
+    }
+
+    return 0;
     selectedSort(target, size);
     printf("MIN %d\n", intMin(target, size));
     printf("MAX %d\n", intMax(target, size));
-    MyQuickSort(target, size);
+
     for (int index = 0; index < size; ++index) {
         printf("%d\n", target[index]);
     }
@@ -77,12 +88,52 @@ void selectedSort(const int pInt[], size_t size) {
 // TODO WIP
 void MyQuickSort(const int pInt[], size_t size) {
     // ピボットとすべき値を算出する
-    // 中央値にすることで一番パフォーマンスがいいらしい
+    // 中央値にすることで一番パフォーマンスがいいらしいがここでは一番最後の値を使う
+
+
+    /*
+     *
+<ol>
+    1. ピボットとして一つ選びそれをPとする。
+    2. 左から順に値を調べ、P以上のものを見つけたらその位置をiとする。
+    3. 右から順に値を調べ、P以下のものを見つけたらその位置をjとする。
+    4. iがjより左にあるのならばその二つの位置を入れ替え、2に戻る。
+       ただし、次の2での探索はiの一つ右、次の3での探索はjの一つ左から行う。
+    5. 2に戻らなかった場合、iの左側を境界に分割を行って2つの領域に分け、そのそれぞれに対して再帰的に1からの手順を行う。要素数が1以下の領域ができた場合、その領域は確定とする。
+</ol>
+     */
+
+
+    int* pivot;
     int half = (int) (size / 2);
-    int pivot = (half % 2 != 0 ? (half + 1) : half);
-    printf("CENTER %d\n", pivot);
+    int tmp = (half % 2 != 0 ? (half + 1) : half);
+    pivot = &tmp;
+    int iIndex = 0;
+    for (int i = 0; i < size; i++) {
+        // 左から順に値を調べ、P以上のものを見つけたらその位置をiとする。
+        if (*pivot < pInt[i]) {
+            iIndex = i;
+            break;
+        }
+
+    }
+
+    int jIndex = 0;
+    for (int j = (int) size; j > 0; --j) {
+        //    3. 右から順に値を調べ、P以下のものを見つけたらその位置をjとする。
+        if (*pivot > pInt[j]) {
+            jIndex = j;
+            break;
+        }
+    }
+    if (iIndex < jIndex) {
+        swap((int *) &pInt[iIndex], (int *) &pInt[jIndex]);
+    }
+
+    MyQuickSort(pInt, size);
+//    printf("CENTER %d\n", *pInt);
+
     // ピボットをpickする
-    // start 再帰
     // 一番左にマーカーをおく
     // 一番右にマーカーをおく
     // 左マーカーを右に
@@ -94,11 +145,6 @@ void MyQuickSort(const int pInt[], size_t size) {
     // マーカーがぶつかった場合はそのマーカーがいる数とpivotを入れ替える
     // pivotだった数はソート済みにする
     // goto start再帰
-
-
-//    for (int index = 0; index < size; ++index) {
-//        pInt[index];
-//    }
 }
 
 
