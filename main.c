@@ -2,18 +2,20 @@
 #include <mach/vm_types.h>
 #include <stdlib.h>
 
-void swap(int *a, int *b) ;
+void swap(int *a, int *b);
 
-void selectedSort(const int *pInt, size_t size) ;
+void selectedSort(const int *pInt, size_t size);
 
-int intMin(const int PInt[], size_t size) ;
+int intMin(const int PInt[], size_t size);
 
-int intMax(const int PInt[], size_t size) ;
+int intMax(const int PInt[], size_t size);
 
-int intAvg(const int pInt[], size_t size) ;
+int intAvg(const int pInt[], size_t size);
 
 // TODO WIP
-void MyQuickSort(const int pInt[], size_t size) ;
+void MyQuickSort(const int pInt[], int left, int right);
+
+int centerValue(size_t size);
 
 void hello_world() {
     printf("Hello c language world!\n");
@@ -21,22 +23,15 @@ void hello_world() {
 
 int main() {
 
-//    int a = 10;
-//    int b = 999999;
-//    printf("a = %3d : b = %3d\n",a,b);
-//    swap(&a, &b);
-//    printf("a = %3d : b = %3d\n",a,b);
-    int target[] = {2,1 , 4, 6, -1, -200};
+    int target[] = {2, 1, 4, 6, -1, -200};
     size_t size = sizeof(target) / sizeof(target[0]);
-    for (int i = 0; i < size; ++i) {
-        printf("%d\n", target[i]);
-    }
-    printf("---\n\n ");
-    MyQuickSort(target, size);
+    printf("%d : \n", (int) size - 1);
+    MyQuickSort(target, 0, (int) size - 1);
 
     for (int i = 0; i < size; ++i) {
         printf("%d\n", target[i]);
     }
+
 
     return 0;
     selectedSort(target, size);
@@ -47,7 +42,7 @@ int main() {
         printf("%d\n", target[index]);
     }
 
-    int* pos = NULL;
+    int *pos = NULL;
 
 
     int res = intAvg(target, size);
@@ -78,59 +73,73 @@ void selectedSort(const int pInt[], size_t size) {
                 minPos = innerIndex;
             }
         }
-        int* a = (int *) &pInt[index];
-        int* b = (int *) &pInt[minPos];
+        int *a = (int *) &pInt[index];
+        int *b = (int *) &pInt[minPos];
         swap(a, b);
+    }
+}
+
+int med3(int x, int y, int z) {
+    if (x < y) {
+        if (y < z) {
+            return y;
+        } else if (z < x) {
+            return x;
+        } else {
+            return z;
+        };
+    } else {
+        if (z < y) {
+            return y;
+        } else if (x < z) {
+            return x;
+        } else {
+            return z;
+        }
     }
 }
 
 
 // TODO WIP
-void MyQuickSort(const int pInt[], size_t size) {
+void MyQuickSort(const int pInt[], int left, int right) {
     // ピボットとすべき値を算出する
     // 中央値にすることで一番パフォーマンスがいいらしいがここでは一番最後の値を使う
-
-
     /*
-     *
-<ol>
     1. ピボットとして一つ選びそれをPとする。
     2. 左から順に値を調べ、P以上のものを見つけたらその位置をiとする。
     3. 右から順に値を調べ、P以下のものを見つけたらその位置をjとする。
     4. iがjより左にあるのならばその二つの位置を入れ替え、2に戻る。
        ただし、次の2での探索はiの一つ右、次の3での探索はjの一つ左から行う。
     5. 2に戻らなかった場合、iの左側を境界に分割を行って2つの領域に分け、そのそれぞれに対して再帰的に1からの手順を行う。要素数が1以下の領域ができた場合、その領域は確定とする。
-</ol>
-     */
+    */
 
+    int innerLeft = left;
+    int innerRight = right;
 
-    int* pivot;
-    int half = (int) (size / 2);
-    int tmp = (half % 2 != 0 ? (half + 1) : half);
-    pivot = &tmp;
-    int iIndex = 0;
-    for (int i = 0; i < size; i++) {
-        // 左から順に値を調べ、P以上のものを見つけたらその位置をiとする。
-        if (*pivot < pInt[i]) {
-            iIndex = i;
-            break;
+    if (left < right) {
+        int *pivot;
+        int tmp = med3(pInt[innerLeft], pInt[innerRight + (innerRight - innerLeft) / 2], pInt[innerRight]);
+        pivot = &tmp;
+        while (1) {
+            while (pInt[innerLeft] < *pivot) {
+                innerLeft++;
+            }
+            while (*pivot < pInt[innerRight]) {
+                innerRight--;
+            }
+
+            if (innerLeft >= innerRight) {
+                break;
+            }
+
+            swap((int *) &pInt[innerLeft], (int *) &pInt[innerRight]);
+            innerLeft++;
+            innerRight--;
         }
-
+        MyQuickSort(pInt, left, (innerLeft - 1));
+        MyQuickSort(pInt, (innerRight + 1), right);
     }
-
-    int jIndex = 0;
-    for (int j = (int) size; j > 0; --j) {
-        //    3. 右から順に値を調べ、P以下のものを見つけたらその位置をjとする。
-        if (*pivot > pInt[j]) {
-            jIndex = j;
-            break;
-        }
-    }
-    if (iIndex < jIndex) {
-        swap((int *) &pInt[iIndex], (int *) &pInt[jIndex]);
-    }
-
-    MyQuickSort(pInt, size);
+//    MyQuickSort(pInt, size);
 //    printf("CENTER %d\n", *pInt);
 
     // ピボットをpickする
@@ -147,22 +156,28 @@ void MyQuickSort(const int pInt[], size_t size) {
     // goto start再帰
 }
 
+int centerValue(size_t size) {
+    int *pivot;
+    int half = (int) (size / 2);
+    int tmp = (half % 2 != 0 ? (half + 1) : half);
+    return tmp;
+}
 
 
 int intMin(const int PInt[], size_t size) {
     int min = INT32_MAX;
-    for (int i = 0; i <size ; ++i) {
+    for (int i = 0; i < size; ++i) {
         if (min > PInt[i]) {
             min = PInt[i];
         }
     }
 
-    return  min;
+    return min;
 }
 
 int intMax(const int PInt[], size_t size) {
     int max = INT32_MIN;
-    for (int i = 0; i <size ; ++i) {
+    for (int i = 0; i < size; ++i) {
         if (max < PInt[i]) {
             max = PInt[i];
         }
